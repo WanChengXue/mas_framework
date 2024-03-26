@@ -20,6 +20,13 @@ defmodule FoxSheepWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/api", FoxSheepWeb do
+    pipe_through :browser
+
+    get "/start_game", GameController, :start_game
+    get "/loop_game", GameController, :loop_game
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", FoxSheepWeb do
   #   pipe_through :api

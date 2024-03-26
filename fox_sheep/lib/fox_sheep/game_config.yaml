@@ -1,0 +1,32 @@
+common:
+  world_length: 1980  # 世界的长度 以下所有的单位都是m，速度是m/s
+  world_width: 1080   # 世界的宽度
+  simulation_rate: 60 # 一秒决策60次
+
+
+sheep: 
+  slow_speed_low: 0.22  # 悠闲移动速度下限
+  slow_speed_high: 0.66 # 悠闲移动速度上限
+  fast_speed_low: 0.88    # 快读移动的速度下限
+  fast_speed_high: 1.33   # 快速移动的速度上限
+  run_speed: 8.88          # 逃命时候的速度
+  run_speed_max_continue: &run_speed_max_continue 10 # 逃命速度爆发持续最大时间
+  rest_run_time: *run_speed_max_continue # 初始剩余能够逃命的时间
+  physical_power_recover_rate: 1 # 一秒钟恢复一点逃命体力，最大是10点
+  length: 1  # 羊的长度
+  width: 0.8 # 羊的宽度
+  visual_radius: 200 # 羊的视野半径
+  life: "alive" # 初始时候羊是活的
+
+fox: 
+  slow_speed_low: 2.22 # 游荡的速度
+  catch_speed: 11.11 # 追逐的速度
+  catch_speed_max_continue: &catch_speed_max_continue 8 # 追逐速度的最大持续时间
+  rest_catch_time: *catch_speed_max_continue # 初始剩余能追逐的时间
+  physical_power_recover_rate: 2 # 两秒钟恢复一点追逐体力，最大8点
+  length: 1.37 # 狼的长度
+  width: 0.7   # 狼的宽度
+  visual_radius: 300 # 狼的视野半径
+
+
+

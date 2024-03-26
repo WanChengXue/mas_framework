@@ -11,7 +11,6 @@ config :fox_sheep,
   ecto_repos: [FoxSheep.Repo],
   generators: [timestamp_type: :utc_datetime]
 
-
 # Configures the endpoint
 config :fox_sheep, FoxSheepWeb.Endpoint,
   url: [host: "localhost"],

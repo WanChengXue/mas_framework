@@ -51,7 +51,9 @@ defmodule FoxSheep.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
-      {:ecto_sqlite3, "~> 0.13"}
+      {:ecto_sqlite3, "~> 0.13"},
+      {:yaml_elixir, "~> 2.9"},
+      {:cors_plug, "~> 2.0"}
     ]
   end
 
