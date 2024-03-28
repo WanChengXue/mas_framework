@@ -11,12 +11,14 @@ defmodule FoxSheep.Fox do
     world_width = game_params["common"]["world_width"]
     fox_length = game_params["fox"]["length"]
     fox_width = game_params["fox"]["width"]
-    location_x = generate_location(fox_length, world_length - fox_length)
-    location_y = generate_location(fox_width, world_width - fox_width)
-
+    location_x = generate_random_value(fox_length, world_length - fox_length)
+    location_y = generate_random_value(fox_width, world_width - fox_width)
+    {direction_x, direction_y} = generate_direction()
     location_map = %{
       "location_x" => location_x,
       "location_y" => location_y,
+      "direction_x" => direction_x,
+      "direction_y" => direction_y,
       "id" => fox_name,
       "stop_flag" => false
     }
@@ -98,8 +100,13 @@ defmodule FoxSheep.Fox do
     IO.inspect("我是一只狼 #{state["id"]}")
   end
 
-  defp generate_location(min_value, max_value) do
+  defp generate_random_value(min_value, max_value) do
     :rand.uniform() * (max_value - min_value) + min_value
+  end
+
+  defp generate_direction() do
+    abs_angle = :rand.uniform() * :math.pi
+    {:math.cos(abs_angle), :math.sin(abs_angle)}
   end
 
   def continue_loop(pid) do

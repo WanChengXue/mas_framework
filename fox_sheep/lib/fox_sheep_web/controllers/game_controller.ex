@@ -12,20 +12,12 @@ defmodule FoxSheepWeb.GameController do
 
     game_info = FoxSheep.Env.get_env_state()
     IO.inspect(game_info)
-
+    FoxSheep.Env.live_loop()
     conn
     |> put_status(:ok)
     |> json(game_info)
   end
 
-  def loop_game(conn, _prams) do
-    FoxSheep.Env.live_loop()
-    IO.inspect("--- 游戏开始 ----")
-
-    conn
-    |> put_status(:ok)
-    |> json(%{})
-  end
 
   def stop_game(conn, _prams) do
     # 暂停游戏

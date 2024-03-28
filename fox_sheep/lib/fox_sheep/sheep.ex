@@ -1,7 +1,7 @@
 defmodule FoxSheep.Sheep do
   use GenServer
   import YamlElixir
-
+#   require IEx
   def init(sheep_name) do
     game_config = Path.join(File.cwd!(), "lib/fox_sheep/game_config.yaml")
     {:ok, game_params} = YamlElixir.read_from_file(game_config)
@@ -10,14 +10,19 @@ defmodule FoxSheep.Sheep do
     world_width = game_params["common"]["world_width"]
     sheep_length = game_params["sheep"]["length"]
     sheep_width = game_params["sheep"]["width"]
-    location_x = generate_location(sheep_length, world_length - sheep_length)
-    location_y = generate_location(sheep_width, world_width - sheep_width)
-
+    location_x = generate_random_value(sheep_length, world_length - sheep_length)
+    location_y = generate_random_value(sheep_width, world_width - sheep_width)
+    # 脑袋的朝向
+    {direction_x, direction_y} = generate_direction()
     external_map = %{
       "location_x" => location_x,
       "location_y" => location_y,
+      "direction_x" => direction_x,
+      "direction_y" => direction_y,
       "id" => sheep_name,
-      "stop_flag" => false
+      "life" => game_params["sheep"]["life"],
+      "stop_flag" => false,
+      "last_recover_time" => System.system_time(:second)
     }
 
     state = Map.merge(game_params["common"], game_params["sheep"]) |> Map.merge(external_map)
@@ -56,12 +61,38 @@ defmodule FoxSheep.Sheep do
     end
   end
 
+
   def live_loop(state) do
+    # 羊的逻辑：
+    # 观测周边是不是安全的，如果是安全的，则采用一个随机的悠闲速度移动
+    # 如果能够看到狼，则能跑就跑，跑不了小步慢走
+    # 观测，获取周边的羊和狼的位置
+    loc_x = state["location_x"]
+    loc_y = state["location_y"]
+    [agent_type, agent_id] = String.split(state["id"], "_")
+    # obs_list = FoxSheep.Env.get_env_observation({agent_type, agent_id, loc_x, loc_y})
+    # fox_list = Enum.filter(obs_list, fn [wait_agent_id, _, _] -> String.contains?(wait_agent_id, "fox") end)
     IO.inspect("我是一只羊 #{state["id"]}")
+    # # call policy, 给羊的移动方向，以及移动速度
+    # {direction_x, direction_y} = generate_direction()
+    # random_speed = case fox_list do
+    #     nil -> 
+    #       generate_random_value(state["slow_speed_low"], state["slow_speed_high"])
+    #     _ -> 
+    #       generate_random_value(state["fast_speed_low"], state["fast_speed_high"])        
+    #     end
+    # action = {random_speed, direction_x, direction_y}
+    # IO.inspect(action)
   end
 
-  defp generate_location(min_value, max_value) do
+
+  defp generate_random_value(min_value, max_value) do
     :rand.uniform() * (max_value - min_value) + min_value
+  end
+
+  defp generate_direction() do
+    abs_angle = :rand.uniform() * :math.pi
+    {:math.cos(abs_angle), :math.sin(abs_angle)}
   end
 
   def get_location(pid) do
@@ -80,8 +111,10 @@ defmodule FoxSheep.Sheep do
     GenServer.cast(pid, :live_loop)
   end
 
+
   def start_link([sheep_name]) do
     IO.puts("#{sheep_name} start!")
     GenServer.start_link(__MODULE__, sheep_name, name: String.to_atom(sheep_name))
   end
+
 end

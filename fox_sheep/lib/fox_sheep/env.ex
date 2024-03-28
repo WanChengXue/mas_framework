@@ -28,7 +28,26 @@ defmodule FoxSheep.Env do
 
     sheep_location_list =
       Enum.map(1..sheep_number, fn i ->
-        ["Sheep_#{i}"] ++ FoxSheep.Sheep.get_location(String.to_atom("sheep_#{i}"))
+        ["sheep_#{i}"] ++ FoxSheep.Sheep.get_location(String.to_atom("sheep_#{i}"))
+      end)
+
+    {:reply, fox_location_list ++ sheep_location_list, state}
+  end
+
+  def handle_call({:get_location, agent_id}, _from, state) do
+    fox_number = state["fox_number"]
+    sheep_number = state["sheep_number"]
+
+    filter_fox = Enum.filter(1..fox_number, fn i -> "fox_#{i}" != agent_id end)
+    filter_sheep = Enum.filter(1..sheep_number, fn i -> "sheep_#{i}" != agent_id end)
+    fox_location_list =
+      Enum.map(filter_fox, fn i -> 
+            ["fox_#{i}"] ++ FoxSheep.Fox.get_location(String.to_atom("fox_#{i}"))
+      end)
+
+    sheep_location_list =
+      Enum.map(filter_sheep, fn i ->
+            ["sheep_#{i}"] ++ FoxSheep.Sheep.get_location(String.to_atom("sheep_#{i}"))
       end)
 
     {:reply, fox_location_list ++ sheep_location_list, state}
@@ -47,6 +66,14 @@ defmodule FoxSheep.Env do
     {:reply, common_info, state}
   end
 
+  def handle_call(:get_visual_radius, _pid, state) do
+    radius_map = %{
+        "fox" => state["fox"]["visual_radius"],
+        "sheep" => state["sheep"]["visual_raius"]
+    }
+    {:reply, radius_map, state}
+  end
+
   def handle_cast(:live_loop, state) do
     fox_number = state["fox_number"]
     sheep_number = state["sheep_number"]
@@ -63,6 +90,15 @@ defmodule FoxSheep.Env do
     GenServer.call(:fox_sheep_env, :get_location)
   end
 
+  def get_location(agent_id) do
+    GenServer.call(:fox_sheep_env, {:get_location, agent_id})
+  end
+
+  def get_visual_radius() do
+    GenServer.call(:fox_sheep_env, :get_visual_radius)
+  end
+
+
   def get_env_fox_sheep_common_info() do
     GenServer.call(:fox_sheep_env, :get_common_info)
   end
@@ -73,9 +109,19 @@ defmodule FoxSheep.Env do
     Map.merge(common_info_map, %{"location" => fox_sheep_location_list})
   end
 
+  def get_env_observation({agent_type, agent_index, loc_x, loc_y}) do
+    location_list = __MODULE__.get_location("#{agent_type}_#{agent_index}")
+    radius_map = __MODULE__.get_visual_radius()
+    get_nearby_agent(location_list, loc_x, loc_y, radius_map[agent_type])
+  end
+
+  defp get_nearby_agent(location_list, x, y, visual_radius) do
+    # 无论是fox还是sheep，返回视野范围内的所有agent位置
+    Enum.filter(location_list, fn [_, loc_x, loc_y] -> :math.sqrt((loc_x - x) ** 2 + (loc_y - y)**2) < visual_radius end)
+  end
+
   def live_loop() do
     GenServer.cast(:fox_sheep_env, :live_loop)
-    %{}
   end
 
   def start_link(args) do
