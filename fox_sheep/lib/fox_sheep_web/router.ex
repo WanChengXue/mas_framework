@@ -25,6 +25,7 @@ defmodule FoxSheepWeb.Router do
 
     get "/start_game", GameController, :start_game
     get "/loop_game", GameController, :loop_game
+    get "/env_scenario", GameController, :get_game_scenario
   end
 
   # Other scopes may use custom stacks.

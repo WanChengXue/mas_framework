@@ -62,6 +62,26 @@ defmodule FoxSheep.Sheep do
   end
 
 
+  def handle_call(:ping, _from, state) do
+    {:reply, :pong, state}
+  end
+
+  def handle_cast({:ping, pid}, state) do
+    GenServer.cast(pid, {:pong, "#{state["id"]} pong"})
+    {:noreply, state}
+  end
+
+  def handle_cast({:pong, info}, state) do
+    IO.inspect(info)
+    {:noreply, state}
+  end
+
+  def ping({call_agent, agent_id}) do
+    IO.inspect("#{call_agent} ping #{agent_id}")
+    # GenServer.call(String.to_atom(agent_id), :ping)
+    GenServer.cast(String.to_atom(agent_id), {:ping,String.to_atom(agent_id)})
+  end
+
   def live_loop(state) do
     # 羊的逻辑：
     # 观测周边是不是安全的，如果是安全的，则采用一个随机的悠闲速度移动
@@ -73,13 +93,17 @@ defmodule FoxSheep.Sheep do
     # obs_list = FoxSheep.Env.get_env_observation({agent_type, agent_id, loc_x, loc_y})
     # fox_list = Enum.filter(obs_list, fn [wait_agent_id, _, _] -> String.contains?(wait_agent_id, "fox") end)
     IO.inspect("我是一只羊 #{state["id"]}")
+    if :random.uniform() > 0.5 do
+        fox_number = ceil(:rand.uniform() * 4)
+        __MODULE__.ping({state["id"], "fox_#{fox_number}"})
+    end
     # # call policy, 给羊的移动方向，以及移动速度
     # {direction_x, direction_y} = generate_direction()
     # random_speed = case fox_list do
-    #     nil -> 
+    #     nil ->
     #       generate_random_value(state["slow_speed_low"], state["slow_speed_high"])
-    #     _ -> 
-    #       generate_random_value(state["fast_speed_low"], state["fast_speed_high"])        
+    #     _ ->
+    #       generate_random_value(state["fast_speed_low"], state["fast_speed_high"])
     #     end
     # action = {random_speed, direction_x, direction_y}
     # IO.inspect(action)

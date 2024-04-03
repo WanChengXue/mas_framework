@@ -3,16 +3,17 @@ defmodule FoxSheepWeb.GameController do
 
   def get_game_scenario(conn, _params) do
     # The home page is often custom made,
+    game_info = FoxSheep.Env.get_env_state()
+    conn
+    |> put_status(:ok)
+    |> json(game_info)
   end
 
   def start_game(conn, %{"fox_number" => fox_number, "sheep_number" => sheep_nubmer}) do
-    FoxSheep.EnvSupervisor.start_link(
-      {String.to_integer(fox_number), String.to_integer(sheep_nubmer)}
+    FoxSheep.SupervisorManager.start_game(
+        {String.to_integer(fox_number), String.to_integer(sheep_nubmer)}
     )
-
-    game_info = FoxSheep.Env.get_env_state()
-    IO.inspect(game_info)
-    FoxSheep.Env.live_loop()
+    game_info = %{}
     conn
     |> put_status(:ok)
     |> json(game_info)

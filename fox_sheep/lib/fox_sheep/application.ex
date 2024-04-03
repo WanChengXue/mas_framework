@@ -17,7 +17,8 @@ defmodule FoxSheep.Application do
       # Start a worker by calling: FoxSheep.Worker.start_link(arg)
       # {FoxSheep.Worker, arg},
       # Start to serve requests, typically the last entry
-      FoxSheepWeb.Endpoint
+      FoxSheepWeb.Endpoint,
+      FoxSheep.SupervisorManager
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

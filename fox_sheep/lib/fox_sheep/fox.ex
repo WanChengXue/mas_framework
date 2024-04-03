@@ -31,7 +31,7 @@ defmodule FoxSheep.Fox do
     # 策略部分
     # 观测，observation，定义数据格式为 [{location_x, location_y}]
     # 简单策略，如果说当前范围内有sheep，则判断出最近的sheep，采用追逐速度，如果追逐体力到了，就采用缓慢移动策略
-    # 如果len(observation)不是0，则肯定有羊 
+    # 如果len(observation)不是0，则肯定有羊
     if length(observation) == 0 do
       # 没看到羊，游荡
       direction = Enum.random(["Up", "Bottom", "Left", "Right"])
@@ -96,8 +96,31 @@ defmodule FoxSheep.Fox do
     end
   end
 
+  def handle_call(:ping, _from, state) do
+    {:reply, :pong, state}
+  end
+
+  def handle_cast({:ping, pid}, state) do
+    GenServer.cast(pid, {:pong, "#{state["id"]} pong"})
+    {:noreply, state}
+  end
+
+  def handle_cast({:pong, info}, state) do
+    IO.inspect(info)
+    {:noreply, state}
+  end
+
+  def ping({caller_agent, agent_id}) do
+    IO.inspect("#{caller_agent} ping #{agent_id}")
+    GenServer.cast(String.to_atom(agent_id), {:ping, String.to_atom(agent_id)})
+  end
+
   def live_loop(state) do
     IO.inspect("我是一只狼 #{state["id"]}")
+    if :random.uniform() > 0.5 do
+        sheep_number = ceil(:rand.uniform() * 10)
+        __MODULE__.ping({state["id"], "sheep_#{sheep_number}"})
+    end
   end
 
   defp generate_random_value(min_value, max_value) do
