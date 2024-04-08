@@ -17,8 +17,14 @@ defmodule ModelTestWeb.Router do
   scope "/", ModelTestWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", GameController, :game_home
+    get "/load", GameController, :load_game
+    get "/exit", GameController, :exit_game
+    get "/new", GameController, :new_game
+    get "/get_game_observation", GameController, :get_game_observation
   end
+
+  
 
   # Other scopes may use custom stacks.
   # scope "/api", ModelTestWeb do

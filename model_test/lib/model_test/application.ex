@@ -20,7 +20,8 @@ defmodule ModelTest.Application do
       # Start a worker by calling: ModelTest.Worker.start_link(arg)
       # {ModelTest.Worker, arg},
       # Start to serve requests, typically the last entry
-      ModelTestWeb.Endpoint
+      ModelTestWeb.Endpoint,
+      ModelTest.GameCacher
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
