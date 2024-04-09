@@ -30,12 +30,6 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 - 提供可视化界面，类似聊天室的交互形式
 - 将core，抽象规则，api封装成SDK，支持新项目的快速实现
 
-## pipeline
-这个demo的演示包含以下几个功能：
-- 项目启动后弹出一个前端页面，上面是一个聊天框
-- 有一个表单，可以提供输入问题数据，可以自动的在聊天框上展示不同智能体的对话数据
-- 整个评测项目中分为三类智能体：QA智能体，通过传入问题给出结果；评测智能体，当接收到QA数据之后给出具体的评判结果，总结智能体，当接收到QA以及对应的评判数据给出一个总结
-
   
 ## 抽象core
  ### 抽象环境
@@ -43,8 +37,26 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
     graph LR
     RealScenario --> AbstractEnv
 ```
+
 在AbstractEnv中封装了大量的相似操作，对于具体环境而言，对环境的操作就等于对这个抽象环境的操作，比如说对场景的启动，暂停，保存，加载等
 
+
+在和其余智能体交互的时候，比如某个自定义的智能体和环境智能体进行交互，消息的过程是
+```mermaid
+    graph LR
+    RealActor --> AbstractActor
+    AbstractActor --> AbstractEnv
+    AbstractEnv --> RealEnv
+```
+消息回传就是上手过程反过来，之所以这么做，是因为在并发系统中，会出现大量的死锁或者延迟等其他系统内的问题，我们将所有可能出现的问题放在两个抽象文件中进行处理完成。
+
+在实例化的时候，如果想要实例出一个真正的actor，和四个actor之间的关系为：
+```mermaid
+    graph TB
+    RealEnv --spawn--> AbstractEnv
+    RealEnv --spawn--> RealActor
+    RealActor --spawn--> AbstractActor
+```
 ### 环境状态
 
 所谓的环境状态是在core中环境这个模块的属性集合，后续所有的操作都是围绕着对这个状态进行增删改查操作
@@ -62,3 +74,34 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 前端项目，svelte实现，详细见model_test_frontend项目
 
 ## SDK
+
+## 开发需求
+### core部分需求
+- [ ] 抽象环境模块
+- [ ] 抽象环境模块的状态定义
+- [ ] 抽象智能体模块
+- [ ] 抽象智能体模块的状态定义
+### demo scenario需求
+demo场景围绕着模型评测展开，能够完成以下几个需求：
+- [ ] 项目运行起来之后，能够在一个前端页面上看到创建新评测，加载历史评测选择框
+- [ ] 点击创建新评测之后，进入到一个类似聊天室的交互页面，新创建了之后什么信息都不会有
+- [ ] 提供创建智能体的api，当点击左边创建智能体可以输入智能体的类型，智能体的名字（可以不输入）从而在聊天室中创建对应的智能体
+- [ ] 提供控制智能体的api，当前只开发question智能体的控制api，能够输入api的名字，让给它一条要询问的问题，完成自动在系统中寻找到answer智能体给它解答，critic智能体能够完成一段总结工作的pipeline
+
+### demo scenario开发需求
+- [ ] 具体环境模块的实现
+- [ ] question智能体模块的实现
+- [ ] answer智能体模块的实现
+- [ ] critic智能体模块的实现
+- [ ] 具体环境状态模块的定义
+- [ ] question智能体状态模块的定义
+- [ ] answer智能体状态模块的定义
+- [ ] critic智能体状态模块的定义
+- [ ] 具体场景抽象图连接规则的定义
+
+### 后端接口
+- [ ] 家目录接口 "/"
+- [ ] 创建一个新的评测 "/new"
+- [ ] 创建一个新的智能体 "/new_actor"
+- [ ] 给question智能体传入一个问题文本 "/question"
+- [ ] 根据固定频率访问后端，获取最新的环境状态数据 "/get_game_observation"

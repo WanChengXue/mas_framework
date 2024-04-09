@@ -24,8 +24,6 @@ defmodule ModelTestWeb.Router do
     get "/get_game_observation", GameController, :get_game_observation
   end
 
-  
-
   # Other scopes may use custom stacks.
   # scope "/api", ModelTestWeb do
   #   pipe_through :api

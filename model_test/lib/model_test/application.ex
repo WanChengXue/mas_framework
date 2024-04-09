@@ -11,8 +11,7 @@ defmodule ModelTest.Application do
       ModelTestWeb.Telemetry,
       ModelTest.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:model_test, :ecto_repos),
-        skip: skip_migrations?()},
+       repos: Application.fetch_env!(:model_test, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:model_test, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ModelTest.PubSub},
       # Start the Finch HTTP client for sending emails

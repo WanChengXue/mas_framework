@@ -1,11 +1,13 @@
 defmodule ModelTest.Core.ActorState do
-    alias __MODULE__
+  alias __MODULE__
 
-    @enfoce_keys [
-        :agent_number,
-        :state,
-        :agent_pid_map
-    ]
+  @enfoce_keys [
+    :mail_box
+  ]
 
-    defstruct [:agent_number, :state, :agent_pid_map] 
+  defstruct [:mail_box]
+
+  def new() do
+    %ActorState{mail_box: MapSet.new()}
+  end
 end
