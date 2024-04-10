@@ -33,9 +33,13 @@ defmodule ModelTestWeb.GameController do
     |> json(game_data)
   end
 
-  def new_actor(conn, %{"game_id"=>game_id, "actor_type"=>actor_type, "actor_name" => actor_name}) do
+  def new_actor(conn, %{
+        "game_id" => game_id,
+        "actor_type" => actor_type,
+        "actor_name" => actor_name
+      }) do
     game_pid = ModelTest.GameCacher.get_game_pid(game_id)
-    ModelTest.Scenario.Env.spawn_actor(actor_type, actor_name)
+    ModelTest.Scenario.Env.spawn_actor(game_pid, actor_type, actor_name)
     conn |> put_status(:ok)
   end
 
@@ -45,7 +49,6 @@ defmodule ModelTestWeb.GameController do
     ModelTest.Scenario.QuestionActor.question(actor_pid, question)
     conn |> put_status(:ok)
   end
-
 
   # ------- 不是重要api，暂时不开发 ------
   def stop_game() do

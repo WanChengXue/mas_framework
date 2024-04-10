@@ -22,6 +22,7 @@ defmodule ModelTestWeb.Router do
     get "/exit", GameController, :exit_game
     get "/new", GameController, :new_game
     get "/get_game_observation", GameController, :get_game_observation
+    get "/new_actor", GameController, :new_actor
   end
 
   # Other scopes may use custom stacks.

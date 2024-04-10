@@ -8,12 +8,21 @@ defmodule ModelTest.Scenario.EnvState do
     :agent_pid_map,
     :abstract_rule,
     :game_id
+    :game_pid
+    :abstract_env_pid
   ]
 
-  defstruct [:stream_list, :agent_pid_map, :abstract_rule, :game_id]
+  defstruct [:stream_list, :agent_pid_map, :abstract_rule, :game_id, :game_pid, :abstract_env_pid]
 
   def new() do
-    %EnvState{stream_list: [], agent_pid_map: %{}, abstract_rule: abstract_link_rule(), game_id: ""}
+    %EnvState{
+      stream_list: [],
+      agent_pid_map: %{},
+      abstract_rule: abstract_link_rule(),
+      game_id: "",
+      game_pid: "",
+      abstract_env_pid: ""
+    }
   end
 
   def abstract_link_rule() do
@@ -38,5 +47,12 @@ defmodule ModelTest.Scenario.EnvState do
   def regist_actor(%EnvState{} = env_state, agent_name, agent_pid) do
     updated_agent_pid_map = Map.put(env_state.agent_pid_map, agent_name, agent_pid)
     %EnvState{env_state | agent_pid_map: updated_agent_pid_map}
+  end
+
+  def regist_env_pid(%EnvState{} = env_state, game_id, game_pid, abstract_game_pid) do
+    env_state
+    |> Map.put(game_id: game_id)
+    |> Map.put(game_pid: game_pid)
+    |> Map.put(abstract_game_pid: abstract_game_pid)
   end
 end
