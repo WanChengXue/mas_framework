@@ -2,35 +2,36 @@ defmodule ModelTest.Core.EnvState do
   alias __MODULE__
 
   @enfoce_keys [
-    :agent_number,
-    :state,
-    :agent_pid_map,
-    :abstract_env_pid,
-    :env_pid
+    :actor_number,
+    :attr_map,
+    :actor_pid_map
   ]
 
-  defstruct [:agent_number, :state, :agent_pid_map, :abstract_env_pid, :env_pid]
+  defstruct [:actor_number, :attr_map, :actor_pid_map]
 
-  def new(state) do
+  def new(state \\ %{}) do
     %EnvState{
-      agent_number: 0,
-      state: state,
-      agent_pid_map: %{},
-      abstract_env_pid: "",
-      env_pid: ""
+      actor_number: 0,
+      attr_map: state,
+      actor_pid_map: %{}
     }
   end
 
-  def regist_actor(%EnvState{} = env_state, agent_name, agent_pid) do
-    updated_agent_pid_map = Map.put(env_state.agent_pid_map, agent_name, agent_pid)
-    %EnvState{env_state | agent_pid_map: updated_agent_pid_map}
+  def regist_actor(%EnvState{} = env_state, actor_name, actor_pid) do
+    updated_actor_pid_map = Map.put(env_state.actor_pid_map, actor_name, actor_pid)
+    %EnvState{env_state | actor_pid_map: updated_actor_pid_map}
   end
 
-  def add_abstract_env_pid(env_state, abs_env_pid) do
-    %EnvState{env_state | abstract_env_pid: abs_env_pid}
+  def get_actor_pid_map(%EnvState{} = env_state) do
+    env_state.actor_pid_map
   end
 
-  def set_env_pid(env_state, env_pid) do
-    %EnvState{env_state | env_pid: env_pid}
+  def set_state(%EnvState{} = env_state, key, value) do
+    updated_attr_map = Map.put(env_state.attr_map, key, value)
+    %EnvState{env_state | attr_map: updated_attr_map}
+  end
+
+  def get_state(%EnvState{} = env_state, key) do
+    env_state.attr_map[key]
   end
 end
