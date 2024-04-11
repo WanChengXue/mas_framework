@@ -39,15 +39,18 @@ defmodule ModelTestWeb.GameController do
         "actor_name" => actor_name
       }) do
     game_pid = ModelTest.GameCacher.get_game_pid(game_id)
-    ModelTest.Scenario.Env.spawn_actor(game_pid, actor_type, actor_name)
-    conn |> put_status(:ok)
+    actor_name = ModelTest.Scenario.Env.spawn_actor(game_pid, actor_type, actor_name)
+
+    conn
+    |> put_status(:ok)
+    |> json(%{"actor_name" => actor_name})
   end
 
   def question(conn, %{"game_id" => game_id, "actor_name" => actor_name, "question" => question}) do
     game_pid = ModelTest.GameCacher.get_game_pid(game_id)
     actor_pid = ModelTest.Scenario.Env.get_actor_pid(game_pid, actor_name)
-    ModelTest.Scenario.QuestionActor.question(actor_pid, question)
-    conn |> put_status(:ok)
+    ModelTest.Scenario.QuestionActor.input_question(actor_pid, question)
+    conn |> put_status(:ok) |> send_resp(200, "")
   end
 
   # ------- 不是重要api，暂时不开发 ------

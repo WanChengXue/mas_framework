@@ -18,6 +18,10 @@ defmodule ModelTest.Scenario.Env do
     GenServer.call(pid, :get_env_state)
   end
 
+  def get_actor_pid(pid, actor_name) do
+    GenServer.call(pid, {:get_actor_pid, actor_name})
+  end
+
   def spawn_actor(game_pid, actor_type, actor_name \\ "") do
     {actor_name, actor_pid} =
       case actor_type do
@@ -69,13 +73,24 @@ defmodule ModelTest.Scenario.Env do
   end
 
   def handle_call(:get_env_observation, _from, state) do
-    {:reply, state |> Map.drop([:__struct__]), state}
+    {:reply, %{"conversation_cache" => state.conversation_cache}, state}
   end
 
   def handle_call(:get_env_state, _from, state) do
     abs_env_pid = ModelTest.Scenario.EnvState.get_state(state, "abs_env_pid")
     abs_env_state = ModelTest.Core.AbstractEnv.get_env_observation(abs_env_pid)
     {:reply, {state, abs_env_state}, state}
+  end
+
+  def handle_call({:get_actor_pid, actor_name}, _from, state) do
+    actor_pid = ModelTest.Scenario.EnvState.get_actor(state, actor_name)
+    {:reply, actor_pid, state}
+  end
+
+  def handle_call({:get_actor_state, actor_name}, _from, state) do
+    actor_pid = ModelTest.Scenario.EnvState.get_actor(state, actor_name)
+    actor_state = GenServer.call(actor_pid, :get_actor_state)
+    {:reply, actor_state, state}
   end
 
   def handle_cast({:regist_actor, actor_name, actor_pid}, state) do
@@ -97,22 +112,23 @@ defmodule ModelTest.Scenario.Env do
     {:noreply, new_state}
   end
 
-  def handle_call({:get_actor_state, actor_name}, _from, state) do
-    actor_pid = ModelTest.Scenario.EnvState.get_actor(state, actor_name)
-    actor_state = GenServer.call(actor_pid, :get_actor_state)
-    {:reply, actor_state, state}
-  end
-
   def handle_cast({:broadcast, actor_name, message}, state) do
     abs_env_pid = ModelTest.Scenario.EnvState.get_state(state, "abs_env_pid")
     GenServer.cast(abs_env_pid, {:broadcast, actor_name, message})
     {:noreply, state}
   end
+
+  def handle_cast({:conversation_append, actor_name, conversation}, state) do
+    new_state = ModelTest.Scenario.EnvState.append_conversation(state, actor_name, conversation)
+    {:noreply, new_state}
+  end
 end
 
 # {id, env_pid} = ModelTest.GameCacher.new_game()
 # ModelTest.Scenario.Env.spawn_actor(env_pid, "question_actor", "test")
+# ModelTest.Scenario.Env.spawn_actor(env_pid, "answer_actor", "test2")
+# ModelTest.Scenario.Env.spawn_actor(env_pid, "critic_actor", "test3")
 # {a,b} = ModelTest.Scenario.Env.get_actor_state(env_pid, "test")
 # actor_pid = a.attr_map["actor_pid"]
 # ModelTest.Scenario.Env.get_env_state(env_pid)
-# GenServer.cast(actor_pid, {:hi, "hello"})
+# GenServer.cast(actor_pid, {:set_question, "hello"})

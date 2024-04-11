@@ -15,9 +15,9 @@ defmodule ModelTest.Scenario.QuestionActor do
     #
   end
 
-#   def handle_cast({:question, question}, state) do
-#     {:noreply, state}
-#   end
+  #   def handle_cast({:question, question}, state) do
+  #     {:noreply, state}
+  #   end
 
   def handle_call(:get_actor_state, _from, state) do
     abs_actor_pid = ModelTest.Scenario.QuestionActorState.get_state(state, "abs_actor_pid")
@@ -27,24 +27,26 @@ defmodule ModelTest.Scenario.QuestionActor do
 
   def start_link(actor_name) do
     {:ok, pid} = GenServer.start_link(__MODULE__, actor_name)
+
     actor_name =
       case actor_name do
         "" -> Base.url_encode64(:crypto.strong_rand_bytes(16))
         _ -> actor_name
       end
+
     GenServer.cast(pid, {:set_actor_pid, actor_name, pid})
     {actor_name, pid}
   end
 
   def handle_cast({:set_actor_pid, actor_name, actor_pid}, state) do
-    abstract_actor_pid = ModelTest.Scenario.QuestionActorState.get_state(state, "abs_actor_pid")
+    abs_actor_pid = ModelTest.Scenario.QuestionActorState.get_state(state, "abs_actor_pid")
 
     new_state =
       state
       |> ModelTest.Scenario.QuestionActorState.set_state("actor_name", actor_name)
       |> ModelTest.Scenario.QuestionActorState.set_state("actor_pid", actor_pid)
 
-    ModelTest.Core.AbstractActor.set_actor_pid(actor_name, actor_pid, abstract_actor_pid)
+    ModelTest.Core.AbstractActor.set_actor_pid(actor_name, actor_pid, abs_actor_pid)
     {:noreply, new_state}
   end
 
@@ -63,8 +65,9 @@ defmodule ModelTest.Scenario.QuestionActor do
     # 为这个任务生成一个唯一的task id
     message_id = generate_message_id()
     env_pid = ModelTest.Scenario.QuestionActorState.get_state(state, "env_pid")
-    # actor_name 
+    # actor_name
     actor_name = ModelTest.Scenario.QuestionActorState.get_state(state, "actor_name")
+
     # 如果传入了一条消息，则这个智能体会发送给env，然后env再广播给所有的actor
     GenServer.cast(env_pid, {:broadcast, actor_name, {:ping, message_id, message}})
     {:noreply, state}
@@ -81,39 +84,63 @@ defmodule ModelTest.Scenario.QuestionActor do
     IO.inspect(content)
     {:noreply, state}
   end
-  # --------------- ping - pong broadcast demo -------  
 
-   # -------- set question --------
+  # --------------- ping - pong broadcast demo -------
+
+  # -------- set question --------
   def handle_cast({:set_question, content}, state) do
     # 设置了问题之后，这个question actor需要广播到环境中被其余智能体知晓
     message_id = generate_message_id()
     env_pid = ModelTest.Scenario.QuestionActorState.get_state(state, "env_pid")
-    # actor_name 
+    # actor_name
     actor_name = ModelTest.Scenario.QuestionActorState.get_state(state, "actor_name")
+
+    new_state =
+      ModelTest.Scenario.QuestionActorState.set_question_cache(state, message_id, content)
+    GenServer.cast(env_pid, {:conversation_append, actor_name, content})
     GenServer.cast(env_pid, {:broadcast, actor_name, {:answer_question, message_id, content}})
+    {:noreply, new_state}
   end
 
-  def handle_cast({:question_reply, answer}, state) do
+  def handle_cast({:question_reply, message_id, answer}, state) do
     IO.inspect(answer)
+    new_state = ModelTest.Scenario.QuestionActorState.append_reply(state, message_id, answer)
+    reply_length = ModelTest.Scenario.QuestionActorState.get_reply_length(new_state, message_id)
+
+    if reply_length == 1 do
+      env_pid = ModelTest.Scenario.QuestionActorState.get_state(new_state, "env_pid")
+      actor_name = ModelTest.Scenario.QuestionActorState.get_state(new_state, "actor_name")
+
+      {question, answer} =
+        ModelTest.Scenario.QuestionActorState.get_reply_record(new_state, message_id)
+
+      record_map = %{"question" => question, "answer" => answer}
+      GenServer.cast(env_pid, {:broadcast, actor_name, {:critic_record, message_id, record_map}})
+    end
+
     # 接受到了回复之后，发送给env智能体
-    {:noreply, state}  
+    {:noreply, new_state}
   end
 
-  def handle_cast({:question, question}, state) do
-    abstract_actor_pid = state["abstract_actor_pid"]
-    graph_rule = state["graph_rule"]
-    link_graph = ModelTest.Core.AbstractActor.link_graph()
+  def handle_cast({:critic_reply, critic_reply}, state) do
+    IO.inspect(critic_reply)
+    {:noreply, state}
   end
-  
+
   # 模板代码，对core的继承
   def handle_cast({:broadcast, message}, state) do
     try do
-        GenServer.cast(self(), message)
-        {:noreply, state}
+      GenServer.cast(self(), message)
+      {:noreply, state}
     catch
-        _error -> {:noreply, state}
+      _error -> {:noreply, state}
+    end
   end
-  
+
+  def handle_cast(message, state) do
+    {:noreply, state}
+  end
+
   # ---------- tool function ---
   defp generate_message_id() do
     Base.url_encode64(:crypto.strong_rand_bytes(12))

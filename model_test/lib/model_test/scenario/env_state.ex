@@ -7,17 +7,19 @@ defmodule ModelTest.Scenario.EnvState do
     :stream_list,
     :actor_pid_map,
     :abstract_rule,
-    :attr_map
+    :attr_map,
+    :conversation_cache
   ]
 
-  defstruct [:stream_list, :actor_pid_map, :abstract_rule, :attr_map]
+  defstruct [:stream_list, :actor_pid_map, :abstract_rule, :attr_map, :conversation_cache]
 
   def new() do
     %EnvState{
       stream_list: [],
       actor_pid_map: %{},
       abstract_rule: abstract_link_rule(),
-      attr_map: %{}
+      attr_map: %{},
+      conversation_cache: []
     }
   end
 
@@ -56,5 +58,11 @@ defmodule ModelTest.Scenario.EnvState do
 
   def get_state(%EnvState{} = env_state, key) do
     env_state.attr_map[key]
+  end
+
+  def append_conversation(%EnvState{} = env_state, actor_name, conversation) do
+    current_conversation_cache =
+      env_state.conversation_cache ++ ["#{actor_name}: #{conversation}"]
+    %EnvState{env_state | conversation_cache: current_conversation_cache}
   end
 end
