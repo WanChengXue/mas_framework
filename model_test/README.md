@@ -1,23 +1,5 @@
 # ModelTest
 
-To start your Phoenix server:
-
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
-
-
 ## why?
 现有的多智能体仿真项目，所有的智能体都是提前给了链接关系，但是在实际场景中，智能体和智能体之间的链接是随着时间在不停变化的，本项目就是要在一个随时变化的评测场景中，给出一个具体的评测任务的demo
 
@@ -77,31 +59,31 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 
 ## 开发需求
 ### core部分需求
-- [ ] 抽象环境模块
-- [ ] 抽象环境模块的状态定义
-- [ ] 抽象智能体模块
-- [ ] 抽象智能体模块的状态定义
+- [x] 抽象环境模块
+- [x] 抽象环境模块的状态定义
+- [x] 抽象智能体模块
+- [x] 抽象智能体模块的状态定义
 ### demo scenario需求
 demo场景围绕着模型评测展开，能够完成以下几个需求：
 - [ ] 项目运行起来之后，能够在一个前端页面上看到创建新评测，加载历史评测选择框
 - [ ] 点击创建新评测之后，进入到一个类似聊天室的交互页面，新创建了之后什么信息都不会有
-- [ ] 提供创建智能体的api，当点击左边创建智能体可以输入智能体的类型，智能体的名字（可以不输入）从而在聊天室中创建对应的智能体
-- [ ] 提供控制智能体的api，当前只开发question智能体的控制api，能够输入api的名字，让给它一条要询问的问题，完成自动在系统中寻找到answer智能体给它解答，critic智能体能够完成一段总结工作的pipeline
+- [x] 提供创建智能体的api，当点击左边创建智能体可以输入智能体的类型，智能体的名字（可以不输入）从而在聊天室中创建对应的智能体
+- [x] 提供控制智能体的api，当前只开发question智能体的控制api，能够输入api的名字，让给它一条要询问的问题，完成自动在系统中寻找到answer智能体给它解答，critic智能体能够完成一段总结工作的pipeline
 
 ### demo scenario开发需求
-- [ ] 具体环境模块的实现
-- [ ] question智能体模块的实现
-- [ ] answer智能体模块的实现
-- [ ] critic智能体模块的实现
-- [ ] 具体环境状态模块的定义
-- [ ] question智能体状态模块的定义
-- [ ] answer智能体状态模块的定义
-- [ ] critic智能体状态模块的定义
+- [x] 具体环境模块的实现
+- [x] question智能体模块的实现
+- [x] answer智能体模块的实现
+- [x] critic智能体模块的实现
+- [x] 具体环境状态模块的定义
+- [x] question智能体状态模块的定义
+- [x] answer智能体状态模块的定义
+- [x] critic智能体状态模块的定义
 - [ ] 具体场景抽象图连接规则的定义
 
 ### 后端接口
-- [ ] 家目录接口 "/"
-- [ ] 创建一个新的评测 "/new"
-- [ ] 创建一个新的智能体 "/new_actor"
-- [ ] 给question智能体传入一个问题文本 "/question"
-- [ ] 根据固定频率访问后端，获取最新的环境状态数据 "/get_game_observation"
+- [x] 家目录接口 "/"
+- [x] 创建一个新的评测 "/new"
+- [x] 创建一个新的智能体 "/new_actor"
+- [x] 给question智能体传入一个问题文本 "/question"
+- [x] 根据固定频率访问后端，获取最新的环境状态数据 "/get_game_observation"
